@@ -4,7 +4,7 @@ This API validates Vault backups using a POST request. It checks the integrity o
 
 ## Endpoint
 
-- `POST /api/v1/restore`
+- `POST /api/v1/validate`
 
 ## Request Parameters
 
@@ -12,9 +12,6 @@ Send a JSON object with the following fields:
 
 - `source_backup_url` (string): URL of the source Vault backup.
 - `source_keys_url` (string): URL of the source Vault encryption keys (if applicable).
-- `source_token_url` (string): URL of the source Vault token (if applicable).
-- `destination_vault_url` (string): URL of the destination Vault.
-- `destination_vault_token` (string): Token for the destination Vault.
 
 ## Response
 
@@ -26,13 +23,10 @@ Send a JSON object with the following fields:
 Sample Request:
 
 ```json
-POST /api/validate-vault-backup
+POST /api/v1/validate
 {
     "source_backup_url": "https://example.com/backup.zip",
     "source_keys_url": "https://example.com/keys.zip",
-    "source_token_url": "https://example.com/token.txt",
-    "destination_vault_url": "https://destination-vault-url",
-    "destination_vault_token": "destination-token"
 }
 ```
 

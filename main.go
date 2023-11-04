@@ -1,8 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/glueops/vault-backup-validator/vault"
 )
@@ -14,12 +18,13 @@ func setupRouter() *gin.Engine {
 		c.String(http.StatusOK, "pong")
 	})
 
-	r.POST("/api/v1/restore",restoreHandler)
+	r.POST("/api/v1/validate",validateHandler)
 	return r
 }
 
 
-func restoreHandler(c *gin.Context) {
+func validateHandler(c *gin.Context) {
+
 	var requestBody vault.RestoreParams
 
 	if err := c.BindJSON(&requestBody); err != nil {
@@ -35,13 +40,39 @@ func restoreHandler(c *gin.Context) {
         return
 	}
 
-	client, err := vault.NewVault(requestBody.DestinationVaultURL,requestBody.DestinationVaultToken)
+	_, err := vault.SetupVault()
+	if(err != nil) {
+		c.JSON(http.StatusInternalServerError, gin.H{
+            "error": err.Error(),
+        })
+        return
+	}
+
+	initialSecret := make(map[string]string)
+	jsonData, err := os.ReadFile("secrets.json")
+    if err != nil {
+        fmt.Println("Error reading file:", err)
+        return
+    }
+
+	json.Unmarshal(jsonData, &initialSecret)
+	initialVaultSecret := vault.VaultSecrets{
+		Keys: []string{initialSecret["key"]},
+		Token: initialSecret["token"],
+	}
+	vault_addr := "http://localhost:8200"
+	
+	client, err := vault.NewVault(vault_addr,initialVaultSecret.Token)
 	if(err != nil){
 		c.JSON(http.StatusInternalServerError, gin.H{
             "error": err.Error(),
         })
         return
 	}
+	
+	vaultObj := vault.Vault{Client: client}
+	vaultObj.Unseal(&initialVaultSecret)
+	
 	err = vault.RestoreSnapshotFromS3(client,requestBody)
 	if(err!=nil) {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -51,7 +82,7 @@ func restoreHandler(c *gin.Context) {
 	}
 	fmt.Println("Vault restore successful..Now proceeding to unseal..")
 	
-	vaultObj := vault.Vault{Client: client}
+	
 	secrets, err := vaultObj.ParseSecrets(requestBody.SourceKeysURL)
 	if(err!=nil) {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -74,14 +105,15 @@ func restoreHandler(c *gin.Context) {
         })
         return
 	}
+
+	vault.CleanupVault()
+
 	if(verify_success){
-		c.JSON(http.StatusInternalServerError, gin.H{
-            "error": "Invalid Backup, verification failed",
-        })
-        return
+		c.String(http.StatusOK, "Backup is Invalid")
 	}else{
 		c.String(http.StatusOK, "Backup is Valid")
 	}
+
 }
 
 func main() {

@@ -12,9 +12,6 @@ import (
 type RestoreParams struct {
 	SourceBackupURL             string `json:"source_backup_url"`
 	SourceKeysURL               string `json:"source_keys_url"`
-	SourceTokenURL              string `json:"source_token_url"`
-    DestinationVaultURL         string `json:"destination_vault_url"`
-    DestinationVaultToken       string `json:"destination_vault_token"`
 }
 
 func RestoreSnapshotFromS3(v *govault.Client, p RestoreParams) error{
@@ -39,7 +36,7 @@ func RestoreSnapshotFromS3(v *govault.Client, p RestoreParams) error{
 }
 
 func ValidateResotreParams(p RestoreParams) error{
-    if(p.SourceBackupURL == "" || p.SourceKeysURL == "" || p.SourceTokenURL == ""){
+    if(p.SourceBackupURL == "" || p.SourceKeysURL == ""){
         return fmt.Errorf("one or more input from the client are empty")
     }
     return nil
@@ -54,7 +51,7 @@ func VerifyRestore(v *govault.Client, secrets *VaultSecrets) (bool, error){
 	}
 	data := secret.Data
 	for key, value := range(data){
-		if(key == "key1" && value == "value1"){
+		if(key == "key2" && value == "value1"){
 			return true, nil
 		}
 	}

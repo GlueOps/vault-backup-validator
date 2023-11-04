@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"time"
+	"os/exec"
 
 	govault "github.com/hashicorp/vault/api"
 )
@@ -30,6 +31,28 @@ func NewVault(url string,token string) (*govault.Client, error) {
     }
 	client.SetToken(token)
 	return client, nil
+}
+
+func SetupVault() ([]byte, error){
+	scriptPath := "vault/setup_vault.sh"
+
+    cmd := exec.Command("bash", scriptPath)
+    out, err := cmd.CombinedOutput()
+    if err != nil {
+        return nil, fmt.Errorf("error starting vault: %v\n check vault.log", err)
+    }
+	return out, nil
+}
+
+func CleanupVault() ([]byte, error){
+	scriptPath := "vault/cleanup_vault.sh"
+
+    cmd := exec.Command("bash", scriptPath)
+    out, err := cmd.CombinedOutput()
+    if err != nil {
+        return nil, fmt.Errorf("error cleaning up vault: %v", err)
+    }
+	return out, nil
 }
 
 func (v Vault) ParseSecrets(keys_url string) (*VaultSecrets,error){
