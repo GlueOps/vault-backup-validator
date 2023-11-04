@@ -11,7 +11,7 @@ This API validates Vault backups using a POST request. It checks the integrity o
 Send a JSON object with the following fields:
 
 - `source_backup_url` (string): URL of the source Vault backup.
-- `source_keys_url` (string): URL of the source Vault encryption keys (if applicable).
+- `source_keys_url` (string): URL of the source Vault unseal keys and token(if applicable).
 
 ## Response
 
@@ -22,8 +22,9 @@ Send a JSON object with the following fields:
 
 Sample Request:
 
-```json
 POST /api/v1/validate
+
+```json
 {
     "source_backup_url": "https://example.com/backup.zip",
     "source_keys_url": "https://example.com/keys.zip",
