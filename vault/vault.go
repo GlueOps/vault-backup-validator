@@ -9,6 +9,7 @@ import (
 	"os/exec"
 
 	govault "github.com/hashicorp/vault/api"
+	"github.com/glueops/vault-backup-validator/logger"
 )
 
 type Vault struct{
@@ -27,6 +28,7 @@ func NewVault(url string,token string) (*govault.Client, error) {
 	}
 	client, err := govault.NewClient(&govault.Config{Address: url,HttpClient: httpClient})
 	if err != nil {
+		logger.Logger.Error(err.Error())
         return nil, err
     }
 	client.SetToken(token)
@@ -34,31 +36,41 @@ func NewVault(url string,token string) (*govault.Client, error) {
 }
 
 func SetupVault() ([]byte, error){
-	scriptPath := "vault/setup_vault.sh"
+
+	logger.Logger.Info("Setting up test vault server...")
+	scriptPath := "vault/scripts/setup_vault.sh"
 
     cmd := exec.Command("bash", scriptPath)
     out, err := cmd.CombinedOutput()
     if err != nil {
+		logger.Logger.Error(err.Error())
         return nil, fmt.Errorf("error starting vault: %v\n check vault.log", err)
     }
+	logger.Logger.Info("Vault setup done")
 	return out, nil
 }
 
 func CleanupVault() ([]byte, error){
-	scriptPath := "vault/cleanup_vault.sh"
+
+	logger.Logger.Info("Cleaning up vault")
+	scriptPath := "vault/scripts/cleanup_vault.sh"
 
     cmd := exec.Command("bash", scriptPath)
     out, err := cmd.CombinedOutput()
     if err != nil {
+		logger.Logger.Error(err.Error())
         return nil, fmt.Errorf("error cleaning up vault: %v", err)
     }
+	logger.Logger.Info("Vault Cleanup done")
 	return out, nil
 }
 
 func (v Vault) ParseSecrets(keys_url string) (*VaultSecrets,error){
 
+	logger.Logger.Info("Parsing secrets from BackupKeys Endpoint...")
 	resp, err := http.Get(keys_url)
 	if err != nil {
+		logger.Logger.Error(err.Error())
 		return nil,err
 	}
 	defer resp.Body.Close()
@@ -69,12 +81,14 @@ func (v Vault) ParseSecrets(keys_url string) (*VaultSecrets,error){
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		logger.Logger.Error(err.Error())
 		return nil,fmt.Errorf("error reading response body: %s", err)	
 	}
 	
 	var data VaultSecrets
 	err = json.Unmarshal(body, &data)
 	if err != nil {
+		logger.Logger.Error(err.Error())
 		return nil,fmt.Errorf("error unmarshaling json: %s", err)
 	}
 	
@@ -83,13 +97,16 @@ func (v Vault) ParseSecrets(keys_url string) (*VaultSecrets,error){
 
 func (v Vault) Unseal(secrets *VaultSecrets) (*govault.SealStatusResponse, error){
 
+	logger.Logger.Info("Unsealing vault...")
 	sys := v.Client.Sys()
 	var res *govault.SealStatusResponse
 	for _, key := range(secrets.Keys){
 		res, err := sys.Unseal(key)
 		if (err != nil){
+			logger.Logger.Error(err.Error())
 			return res, err
 		}
 	}
+	logger.Logger.Info("Vault unseal done")
 	return res, nil
 }

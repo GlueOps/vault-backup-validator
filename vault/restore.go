@@ -2,11 +2,13 @@ package vault
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net/http"
-	"crypto/tls"
+	"time"
 
 	govault "github.com/hashicorp/vault/api"
+	"github.com/glueops/vault-backup-validator/logger"
 )
 
 type RestoreParams struct {
@@ -17,43 +19,63 @@ type RestoreParams struct {
 func RestoreSnapshotFromS3(v *govault.Client, p RestoreParams) error{
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	logger.Logger.Info("Downloading backup...")
 	resp, err := http.Get(p.SourceBackupURL)
 	if err != nil {
+		logger.Logger.Error(err.Error())
 		return err
 	}
+	logger.Logger.Info("Finished downloading backup")
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("HTTP request failed with status: %s, verify if the url is still valid", resp.Status)
+		logger.Logger.Error("HTTP request failed with status: "+resp.Status+ ", verify if the backup url is still valid")
+		return fmt.Errorf("HTTP request failed with status: %s, verify if the backup url is still valid", resp.Status)
 	}
 
 	//call restore with resp.body and client with token
+	logger.Logger.Info("starting to restore...")
 	if err := v.Sys().RaftSnapshotRestoreWithContext(context.Background(),resp.Body,true); err != nil {
+		logger.Logger.Error(err.Error())
 		return err
 	}
-
+	logger.Logger.Info("Restoring backup success")
     return nil
 }
 
 func ValidateResotreParams(p RestoreParams) error{
     if(p.SourceBackupURL == "" || p.SourceKeysURL == ""){
+		logger.Logger.Error("one or more input from the client are empty")
         return fmt.Errorf("one or more input from the client are empty")
     }
+	logger.Logger.Info("Inputs have been validated successfully")
     return nil
 }
 
 func VerifyRestore(v *govault.Client, secrets *VaultSecrets) (bool, error){
 
+	logger.Logger.Info("Starting to verify the restore..")
+	maxRetries := 3
+    retryDelay := 2 * time.Second
 	v.SetToken(secrets.Token)
-	secret, err := v.Logical().Read("secret/key-1-for-balaji")
-	if(err != nil){
-		return false, err
-	}
-	data := secret.Data
-	for key, value := range(data){
-		if(key == "key2" && value == "value1"){
-			return true, nil
+    for retry := 0; retry < maxRetries; retry++ {
+        secret, err := v.Logical().Read("secret/key-1-for-balaji")
+        if err == nil {
+            data := secret.Data
+            for key, value := range data {
+                if key == "key2" && value == "value1" {
+                    return true, nil
+                }
+            }
+			return false, nil
+        }else{
+			logger.Logger.Error(err.Error())
+			logger.Logger.Info("Retrying to verify restore...")
+			if retry < maxRetries-1 {
+				// Backoff before retry
+				time.Sleep(retryDelay)
+			}
 		}
-	}
-	return false, nil
+    }
+    return false, nil
 }

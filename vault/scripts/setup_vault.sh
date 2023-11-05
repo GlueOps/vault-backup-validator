@@ -2,7 +2,7 @@
 
 # Directory paths
 RAFT_DIR="/data/raft"
-CONFIG_FILE="vault/config.hcl"
+CONFIG_FILE="vault/configs/config.hcl"
 VAULT_TOKEN_FILE="secrets.json"
 
 # Check if /data/raft directory exists, and create it if it doesn't
