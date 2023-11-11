@@ -35,6 +35,20 @@ func NewVault(url string,token string) (*govault.Client, error) {
 	return client, nil
 }
 
+func InstallVault(vault_version string) ([]byte, error){
+
+	logger.Logger.Info("Installing vault "+vault_version+"...")
+	scriptPath := "vault/scripts/install_vault.sh"
+    cmd := exec.Command("bash", scriptPath, vault_version)
+    out, err := cmd.CombinedOutput()
+    if err != nil {
+		logger.Logger.Error(err.Error())
+        return out, fmt.Errorf("error installing vault")
+    }
+	logger.Logger.Info("Vault installation done")
+	return out, nil
+}
+
 func SetupVault() ([]byte, error){
 
 	logger.Logger.Info("Setting up test vault server...")

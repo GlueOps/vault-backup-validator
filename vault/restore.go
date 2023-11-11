@@ -15,6 +15,7 @@ type RestoreParams struct {
 	SourceBackupURL             string                `json:"source_backup_url"`
 	SourceKeysURL               string                `json:"source_keys_url"`
 	PathValuesMap               map[string]interface{}`json:"path_values_map"`
+	VaultVersion                string                `json:"vault_version"`
 }
 
 func RestoreSnapshotFromS3(v *govault.Client, p RestoreParams) error{
@@ -45,7 +46,7 @@ func RestoreSnapshotFromS3(v *govault.Client, p RestoreParams) error{
 }
 
 func ValidateResotreParams(p RestoreParams) error{
-    if(p.SourceBackupURL == "" || p.SourceKeysURL == ""){
+    if p.SourceBackupURL == "" || p.SourceKeysURL == "" || p.PathValuesMap == nil || p.VaultVersion == "" {
 		logger.Logger.Error("one or more input from the client are empty")
         return fmt.Errorf("one or more input from the client are empty")
     }

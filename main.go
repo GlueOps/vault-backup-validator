@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-
+	"sync"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -13,10 +13,18 @@ import (
 )
 
 
-func InitiateVaultSetup(c *gin.Context) (*api.Client, error){
+func InitiateVaultSetup(c *gin.Context, restore_params vault.RestoreParams) (*api.Client, error){
 
-	// Start the vault process with configs
-	_, err := vault.SetupVault()
+	// Install, Start the vault process with config
+	_, err := vault.InstallVault(restore_params.VaultVersion)
+	if(err != nil) {
+		c.JSON(http.StatusInternalServerError, gin.H{
+            "error": err.Error(),
+        })
+        return nil, err
+	}
+
+	_, err = vault.SetupVault()
 	if(err != nil) {
 		c.JSON(http.StatusInternalServerError, gin.H{
             "error": err.Error(),
@@ -103,7 +111,23 @@ func VerifyBackup(client *api.Client, requestBody vault.RestoreParams, c *gin.Co
 	return verify_success, nil
 }
 
+var validationMutex sync.Mutex
+var isValidationInProgress bool
+
 func validateHandler(c *gin.Context) {
+
+	validationMutex.Lock()
+	defer validationMutex.Unlock()
+
+	if isValidationInProgress {
+		c.JSON(http.StatusServiceUnavailable, "API is busy validating. Please try again later.")
+		return
+	}
+
+	isValidationInProgress = true
+	defer func() {
+		isValidationInProgress = false
+	}()
 
 	// Cleanup vault incase of execution errors or in general
 	defer vault.CleanupVault()
@@ -125,7 +149,7 @@ func validateHandler(c *gin.Context) {
         return
 	}
 
-	client, err := InitiateVaultSetup(c)
+	client, err := InitiateVaultSetup(c,requestBody)
 	if(err != nil){
 		return
 	}
