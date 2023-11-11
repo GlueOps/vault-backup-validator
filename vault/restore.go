@@ -6,14 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
+	"strings"
 	govault "github.com/hashicorp/vault/api"
 	"github.com/glueops/vault-backup-validator/logger"
 )
 
 type RestoreParams struct {
-	SourceBackupURL             string `json:"source_backup_url"`
-	SourceKeysURL               string `json:"source_keys_url"`
+	SourceBackupURL             string                `json:"source_backup_url"`
+	SourceKeysURL               string                `json:"source_keys_url"`
+	PathValuesMap               map[string]interface{}`json:"path_values_map"`
 }
 
 func RestoreSnapshotFromS3(v *govault.Client, p RestoreParams) error{
@@ -52,30 +53,34 @@ func ValidateResotreParams(p RestoreParams) error{
     return nil
 }
 
-func VerifyRestore(v *govault.Client, secrets *VaultSecrets) (bool, error){
+func VerifyRestore(v *govault.Client, secrets *VaultSecrets, restoreParams RestoreParams) (bool, error){
 
 	logger.Logger.Info("Starting to verify the restore..")
 	maxRetries := 3
     retryDelay := 2 * time.Second
 	v.SetToken(secrets.Token)
-    for retry := 0; retry < maxRetries; retry++ {
-        secret, err := v.Logical().Read("secret/key-1-for-balaji")
-        if err == nil {
-            data := secret.Data
-            for key, value := range data {
-                if key == "key2" && value == "value1" {
-                    return true, nil
-                }
-            }
-			return false, nil
-        }else{
-			logger.Logger.Error(err.Error())
-			logger.Logger.Info("Retrying to verify restore...")
-			if retry < maxRetries-1 {
-				// Backoff before retry
-				time.Sleep(retryDelay)
+	for path, values := range(restoreParams.PathValuesMap){
+		parts := strings.Split(path, "/")
+		path = strings.Join(parts[:1], "/") + "/data/" + strings.Join(parts[1:], "/")
+		for retry := 0; retry < maxRetries; retry++ {
+			content, err := v.Logical().Read(path)
+			if err == nil {
+				data := content.Data
+				data = data["data"].(map[string]interface{})
+				for key, value := range values.(map[string]interface{}) {
+					if (value.(string) != data[key]){
+						return false, nil
+					}
+				}
+			}else{
+				logger.Logger.Error(err.Error())
+				logger.Logger.Info("Retrying to verify restore...")
+				if retry < maxRetries-1 {
+					// Backoff before retry
+					time.Sleep(retryDelay)
+				}
 			}
 		}
-    }
-    return false, nil
+	}
+    return true, nil
 }

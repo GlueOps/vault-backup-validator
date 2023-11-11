@@ -12,16 +12,6 @@ import (
 	"github.com/hashicorp/vault/api"
 )
 
-func setupRouter() *gin.Engine {
-	r := gin.Default()
-
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "pong")
-	})
-
-	r.POST("/api/v1/validate",validateHandler)
-	return r
-}
 
 func InitiateVaultSetup(c *gin.Context) (*api.Client, error){
 
@@ -103,7 +93,7 @@ func VerifyBackup(client *api.Client, requestBody vault.RestoreParams, c *gin.Co
 	logger.Logger.Info("Vault is unsealed..proceeding to verify the restore")
 
 	// Verify restored values in vault
-	verify_success, err := vault.VerifyRestore(vaultObj.Client,secrets)
+	verify_success, err := vault.VerifyRestore(vaultObj.Client, secrets, requestBody)
 	if(err!=nil) {
 		c.JSON(http.StatusInternalServerError, gin.H{
             "error": err.Error(),
@@ -152,6 +142,17 @@ func validateHandler(c *gin.Context) {
 		c.String(http.StatusOK, "Backup is Invalid")
 	}
 
+}
+
+func setupRouter() *gin.Engine {
+	r := gin.Default()
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.String(http.StatusOK, "pong")
+	})
+
+	r.POST("/api/v1/validate",validateHandler)
+	return r
 }
 
 func main() {
