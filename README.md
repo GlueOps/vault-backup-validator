@@ -51,7 +51,8 @@ keys.json Expected format
   ],
   "root_token": "root_token_string"
 }
-}```
+}
+```
 
 Sample Response
 
