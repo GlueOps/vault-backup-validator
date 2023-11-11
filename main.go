@@ -136,10 +136,18 @@ func validateHandler(c *gin.Context) {
 	
 	if(verify_success){
 		logger.Logger.Info("Backup is verified successfully and it is valid")
-		c.String(http.StatusOK, "Backup is Valid")
+		response := gin.H{
+			"status":  "success",
+			"message": "Backup is valid",
+		}
+		c.JSON(http.StatusOK, response)
 	}else{
 		logger.Logger.Info("Backup is verified and it is Invalid")
-		c.String(http.StatusOK, "Backup is Invalid")
+		response := gin.H{
+			"status":  "error",
+			"message": "Backup is invalid",
+		}
+		c.JSON(http.StatusBadRequest, response)
 	}
 
 }

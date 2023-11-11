@@ -44,7 +44,7 @@ func SetupVault() ([]byte, error){
     out, err := cmd.CombinedOutput()
     if err != nil {
 		logger.Logger.Error(err.Error())
-        return nil, fmt.Errorf("error starting vault: %v\n check vault.log", err)
+        return out, fmt.Errorf("error starting vault: %v\n check vault.log", err)
     }
 	logger.Logger.Info("Vault setup done")
 	return out, nil
