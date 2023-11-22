@@ -66,6 +66,10 @@ func VerifyRestore(v *govault.Client, secrets *VaultSecrets, restoreParams Resto
 		for retry := 0; retry < maxRetries; retry++ {
 			content, err := v.Logical().Read(path)
 			if err == nil {
+				if(content == nil){
+					logger.Logger.Error("no values in the given path or the given path does not exist")
+					return false, fmt.Errorf("no values in the given path or the given path does not exist")
+				}
 				data := content.Data
 				data = data["data"].(map[string]interface{})
 				for key, value := range values.(map[string]interface{}) {
