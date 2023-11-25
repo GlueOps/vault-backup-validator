@@ -42,7 +42,6 @@ keys.json Expected format
 
 ```json
 {
-    {
   "keys": [
     "key_in_hexa"
   ],
@@ -50,7 +49,6 @@ keys.json Expected format
     "key_in_base64"
   ],
   "root_token": "root_token_string"
-}
 }
 ```
 
