@@ -20,7 +20,7 @@ RUN apt-get update
 RUN apt-get install unzip -y
 RUN apt-get install jq -y
 #Download and install Vault
-RUN wget https://releases.hashicorp.com/vault/1.15.0/vault_1.15.0_linux_amd64.zip -O vault.zip && \
+RUN wget https://releases.hashicorp.com/vault/1.14.0/vault_1.14.0_linux_amd64.zip -O vault.zip && \
     unzip vault.zip -d /usr/local/bin && \
     rm vault.zip
 
