@@ -1,6 +1,6 @@
 module github.com/glueops/vault-backup-validator
 
-go 1.21.3
+go 1.21.9
 
 require (
 	github.com/gin-gonic/gin v1.9.1
