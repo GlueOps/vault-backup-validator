@@ -16,7 +16,7 @@ COPY . .
 # Build the Go application
 RUN go build -o vault-backup-validator . && \
     apt-get update && \
-    apt-get install -y --no-install-recommends unzip jq && \
+    apt-get install -y unzip jq && \
     rm -rf /var/lib/apt/lists/*
     
 #Download and install Vault
