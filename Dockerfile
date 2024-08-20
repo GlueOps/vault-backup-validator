@@ -14,15 +14,13 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN go build -o vault-backup-validator .
-
-RUN apt-get update
-RUN apt-get install unzip -y
-RUN apt-get install jq -y
+RUN go build -o vault-backup-validator . && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends unzip jq && \
+    rm -rf /var/lib/apt/lists/*
+    
 #Download and install Vault
-RUN wget https://releases.hashicorp.com/vault/1.14.0/vault_1.14.0_linux_amd64.zip -O vault.zip && \
-    unzip vault.zip -d /usr/local/bin && \
-    rm vault.zip
+ADD https://releases.hashicorp.com/vault/1.14.0/vault_1.14.0_linux_amd64.zip /usr/local/bin/
 
 EXPOSE 8080
 
