@@ -1,5 +1,5 @@
 # Stage 1: Build the Go application
-FROM golang:1.21.10@sha256:392d2b634cba642c48e23b22949af823d42f4e722ca2d9f519133445e5a4cbba
+FROM golang:1.22.6@sha256:367bb5295d3103981a86a572651d8297d6973f2ec8b62f716b007860e22cbc25
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -14,15 +14,17 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN go build -o vault-backup-validator .
-
-RUN apt-get update
-RUN apt-get install unzip -y
-RUN apt-get install jq -y
+RUN go build -o vault-backup-validator . && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends unzip jq && \
+    rm -rf /var/lib/apt/lists/*
+    
 #Download and install Vault
-RUN wget https://releases.hashicorp.com/vault/1.14.0/vault_1.14.0_linux_amd64.zip -O vault.zip && \
-    unzip vault.zip -d /usr/local/bin && \
-    rm vault.zip
+ADD https://releases.hashicorp.com/vault/1.14.0/vault_1.14.0_linux_amd64.zip /tmp/vault.zip
+
+# Unzip the Vault binary and clean up
+RUN unzip /tmp/vault.zip -d /usr/local/bin/ && \
+    rm /tmp/vault.zip
 
 EXPOSE 8080
 
