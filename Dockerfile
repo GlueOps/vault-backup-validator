@@ -16,11 +16,15 @@ COPY . .
 # Build the Go application
 RUN go build -o vault-backup-validator . && \
     apt-get update && \
-    apt-get install -y unzip jq && \
+    apt-get install -y --no-install-recommends unzip jq && \
     rm -rf /var/lib/apt/lists/*
     
 #Download and install Vault
-ADD https://releases.hashicorp.com/vault/1.14.0/vault_1.14.0_linux_amd64.zip /usr/local/bin/
+ADD https://releases.hashicorp.com/vault/1.14.0/vault_1.14.0_linux_amd64.zip /tmp/vault.zip
+
+# Unzip the Vault binary and clean up
+RUN unzip /tmp/vault.zip -d /usr/local/bin/ && \
+    rm /tmp/vault.zip
 
 EXPOSE 8080
 
