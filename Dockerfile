@@ -1,5 +1,5 @@
 # Stage 1: Build the Go application
-FROM golang:1.24.2@sha256:991aa6a6e4431f2f01e869a812934bd60fbc87fb939e4a1ea54b8494ab9d2fc6
+FROM golang:1.24.3@sha256:81bf5927dc91aefb42e2bc3a5abdbe9bb3bae8ba8b107e2a4cf43ce3402534c6
 
 # Set the working directory inside the container
 WORKDIR /app
