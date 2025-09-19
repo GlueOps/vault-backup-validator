@@ -1,6 +1,9 @@
 name: Publish to GHCR.io
  
-on: [push]
+on:
+  push:
+    tags:
+      - 'v*'
 
 env:
   REGISTRY: ghcr.io
