@@ -1,26 +1,12 @@
 #!/bin/bash
-
-VAULT_VERSION="$1" # Get the Vault version from the first command-line argument
-DOWNLOAD_URL="https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip"
+echo "BUILT IN OPENBAO_VERSION: ${CACHED_OPENBAO_VERSION}"
+PROVIDED_OPENBAO_VERSION="$1" # Get the Vault version from the first command-line argument
 
 cd ~
-# Check if Vault is installed  TODO: change it to /usr/local/bin
-if [ /usr/bin/vault ]; then
-    # Remove existing Vault 
-    sudo rm /usr/bin/vault
+if [ "$INSTALLED_VERSION" != "$PROVIDED_VERSION" ]; then
+    sudo rm -f /usr/bin/bao
+    wget -O https://github.com/openbao/openbao/releases/download/v${PROVIDED_OPENBAO_VERSION}/bao_${PROVIDED_OPENBAO_VERSION}_Linux_x86_64.tar.gz /tmp/bao_${PROVIDED_OPENBAO_VERSION}_Linux_x86_64.tar.gz
+    tar -xzvf /tmp/bao_${PROVIDED_OPENBAO_VERSION}_Linux_x86_64.tar.gz bao && sudo mv bao /usr/bin/bao && rm /tmp/bao_${PROVIDED_OPENBAO_VERSION}_Linux_x86_64.tar.gz
 fi
 
-# Download Vault
-wget -O vault.zip "${DOWNLOAD_URL}"
 
-# Unzip the downloaded file without prompting
-unzip -o vault.zip
-
-# Make Vault executable
-chmod +x vault
-
-# Move Vault to a directory in your PATH without prompting
-sudo mv -f vault /usr/bin/
-
-# Clean up
-rm vault.zip
