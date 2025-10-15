@@ -29,8 +29,7 @@ ADD https://github.com/openbao/openbao/releases/download/v${VERSION_OPENBAO}/bao
 
 
 # Unzip the Bao binary and clean up
-RUN tar -xzvf /tmp/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz bao && sudo mv bao /usr/bin/bao && \
-    rm /tmp/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz
+RUN tar -xzvf /tmp/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz bao && mv bao /usr/bin/bao && rm /tmp/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz
 
 EXPOSE 8080
 
