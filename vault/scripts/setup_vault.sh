@@ -22,7 +22,7 @@ cat > "$RAFT_DIR/peers.json" << EOF
 EOF
 
 # Start Vault server with the specified config file
-nohup vault server -config="$CONFIG_FILE" > vault.log 2>&1 &
+nohup bao server -config="$CONFIG_FILE" > vault.log 2>&1 &
 
 # Wait for Vault to start (adjust sleep duration as needed)
 sleep 30
@@ -31,7 +31,7 @@ sleep 30
 export VAULT_ADDR=http://127.0.0.1:8200
 
 # Initialize Vault and store the unseal token and root token
-vault_data=$(vault operator init -key-shares=1 -key-threshold=1 --format=json)
+vault_data=$(bao operator init -key-shares=1 -key-threshold=1 --format=json)
 echo $vault_data
 root_token=$(echo "$vault_data" | jq -r .root_token)
 unseal_token=$(echo "$vault_data" | jq -r .unseal_keys_b64[0])

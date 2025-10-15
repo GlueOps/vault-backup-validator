@@ -19,12 +19,17 @@ RUN go build -o vault-backup-validator . && \
     apt-get install -y --no-install-recommends unzip jq && \
     rm -rf /var/lib/apt/lists/*
     
-#Download and install Vault
-ADD https://releases.hashicorp.com/vault/1.14.0/vault_1.14.0_linux_amd64.zip /tmp/vault.zip
 
-# Unzip the Vault binary and clean up
-RUN unzip /tmp/vault.zip -d /usr/local/bin/ && \
-    rm /tmp/vault.zip
+# renovate: datasource=github-tags depName=openbao/openbao
+ARG VERSION_OPENBAO=2.4.0
+ENV CACHED_OPENBAO_VERSION=${VERSION_OPENBAO}
+  
+#Download and install Bao
+ADD https://github.com/openbao/openbao/releases/download/v${VERSION_OPENBAO}/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz /tmp/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz
+
+
+# Unzip the Bao binary and clean up
+RUN tar -xzvf /tmp/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz bao && mv bao /usr/bin/bao && rm /tmp/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz
 
 EXPOSE 8080
 
