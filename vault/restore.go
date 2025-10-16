@@ -60,30 +60,53 @@ func VerifyRestore(v *govault.Client, secrets *VaultSecrets, restoreParams Resto
 	maxRetries := 3
     retryDelay := 2 * time.Second
 	v.SetToken(secrets.Token)
-	for path, values := range(restoreParams.PathValuesMap){
-		parts := strings.Split(path, "/")
-		path = strings.Join(parts[:1], "/") + "/data/" + strings.Join(parts[1:], "/")
+	ctx := context.Background()
+	for path, values := range restoreParams.PathValuesMap {
+		normalized := strings.TrimPrefix(path, "/")
+		parts := strings.SplitN(normalized, "/", 2)
+		if len(parts) < 2 {
+			return false, fmt.Errorf("invalid kv2 path %s", path)
+		}
+
+		mount := parts[0]
+		secretPath := parts[1]
+
+		expectedValues, ok := values.(map[string]interface{})
+		if !ok {
+			return false, fmt.Errorf("expected key-values map for path %s", path)
+		}
+
+		kv := v.KVv2(mount)
+		var secret *govault.Secret
+		var readErr error
+
 		for retry := 0; retry < maxRetries; retry++ {
-			content, err := v.Logical().Read(path)
-			if err == nil {
-				if(content == nil){
-					logger.Logger.Error("no values in the given path or the given path does not exist")
-					return false, fmt.Errorf("no values in the given path or the given path does not exist")
-				}
-				data := content.Data
-				data = data["data"].(map[string]interface{})
-				for key, value := range values.(map[string]interface{}) {
-					if (value.(string) != data[key]){
-						return false, nil
-					}
-				}
-			}else{
-				logger.Logger.Error(err.Error())
-				logger.Logger.Info("Retrying to verify restore...")
-				if retry < maxRetries-1 {
-					// Backoff before retry
-					time.Sleep(retryDelay)
-				}
+			secret, readErr = kv.Get(ctx, secretPath)
+			if readErr == nil {
+				break
+			}
+
+			logger.Logger.Error(readErr.Error())
+			logger.Logger.Info("Retrying to verify restore...")
+			if retry < maxRetries-1 {
+				time.Sleep(retryDelay)
+			}
+		}
+
+		if readErr != nil || secret == nil || secret.Data == nil {
+			logger.Logger.Error("no values in the given path or the given path does not exist")
+			return false, fmt.Errorf("no values in the given path or the given path does not exist")
+		}
+
+		for key, value := range expectedValues {
+			expected, ok := value.(string)
+			if !ok {
+				return false, fmt.Errorf("expected string value for key %s at path %s", key, path)
+			}
+
+			actual, exists := secret.Data[key]
+			if !exists || fmt.Sprintf("%v", actual) != expected {
+				return false, nil
 			}
 		}
 	}
