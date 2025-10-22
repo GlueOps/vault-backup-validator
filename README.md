@@ -1,4 +1,4 @@
-# Vault Backup Validatior
+# Vault Backup Validator
 
 This API validates OpenBao backups using a POST request. It checks the integrity of the backup data to ensure it can be safely restored.
 
