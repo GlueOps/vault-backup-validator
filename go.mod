@@ -7,7 +7,7 @@ toolchain go1.25.4
 require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/hashicorp/vault/api v1.22.0
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.27.1
 )
 
 require (
