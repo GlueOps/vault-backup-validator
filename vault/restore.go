@@ -104,59 +104,49 @@ func VerifyRestore(v *govault.Client, secrets *VaultSecrets, restoreParams Resto
     retryDelay := 2 * time.Second
 	v.SetToken(secrets.Token)
 	
-	logger.Logger.Info(fmt.Sprintf("Vault client address: %s", v.Address()))
+	logger.Logger.Debug(fmt.Sprintf("Vault client address: %s", v.Address()))
 	
 	for path, values := range(restoreParams.PathValuesMap){
 		originalPath := path
 		parts := strings.Split(path, "/")
 		path = strings.Join(parts[:1], "/") + "/data/" + strings.Join(parts[1:], "/")
 		
-		logger.Logger.Info(fmt.Sprintf("Verifying path: %s (original: %s)", path, originalPath))
+		logger.Logger.Debug(fmt.Sprintf("Verifying path: %s (original: %s)", path, originalPath))
 		
 		for retry := 0; retry < maxRetries; retry++ {
-			logger.Logger.Info(fmt.Sprintf("Attempt %d/%d for path %s", retry+1, maxRetries, path))
+			logger.Logger.Debug(fmt.Sprintf("Attempt %d/%d for path %s", retry+1, maxRetries, path))
+			
 			content, err := v.Logical().Read(path)
 			if err == nil {
 				if(content == nil){
-					logger.Logger.Error(fmt.Sprintf("Path %s returned nil content - path does not exist or has no data", path))
+					logger.Logger.Debug(fmt.Sprintf("Path %s returned nil content", path))
+					logger.Logger.Error("Path does not exist or has no data")
 					return false, fmt.Errorf("no values in the given path or the given path does not exist")
 				}
 				data := content.Data
-				if isDebugMode() {
-					logger.Logger.Debug(fmt.Sprintf("Raw content.Data: %+v", data))
-				}
+				logger.Logger.Debug(fmt.Sprintf("Raw content.Data: %+v", data))
 				data = data["data"].(map[string]interface{})
-				if isDebugMode() {
-					logger.Logger.Debug(fmt.Sprintf("Extracted data: %+v", data))
-				}
+				logger.Logger.Debug(fmt.Sprintf("Extracted data: %+v", data))
 				
 				for key, value := range values.(map[string]interface{}) {
-					if isDebugMode() {
-						expectedJSON, _ := json.Marshal(value)
-						actualJSON, _ := json.Marshal(data[key])
-						logger.Logger.Debug(fmt.Sprintf("Comparing key '%s':", key))
-						logger.Logger.Debug(fmt.Sprintf("  Expected (type %T): %s", value, string(expectedJSON)))
-						logger.Logger.Debug(fmt.Sprintf("  Actual   (type %T): %s", data[key], string(actualJSON)))
-					}
+					expectedJSON, _ := json.Marshal(value)
+					actualJSON, _ := json.Marshal(data[key])
+					logger.Logger.Debug(fmt.Sprintf("Comparing key '%s':", key))
+					logger.Logger.Debug(fmt.Sprintf("  Expected (type %T): %s", value, string(expectedJSON)))
+					logger.Logger.Debug(fmt.Sprintf("  Actual   (type %T): %s", data[key], string(actualJSON)))
+					
 					if !compareValues(value, data[key]) {
-						logger.Logger.Error(fmt.Sprintf("Mismatch for key '%s'", key))
-						if isDebugMode() {
-							expectedJSON, _ := json.Marshal(value)
-							actualJSON, _ := json.Marshal(data[key])
-							logger.Logger.Debug(fmt.Sprintf("Mismatch details - expected: %s, got: %s", string(expectedJSON), string(actualJSON)))
-						}
+						logger.Logger.Debug(fmt.Sprintf("Mismatch for key '%s' - expected: %s, got: %s", key, string(expectedJSON), string(actualJSON)))
+						logger.Logger.Error("Value mismatch detected")
 						return false, nil
 					}
-					if isDebugMode() {
-						logger.Logger.Debug(fmt.Sprintf("Key '%s' matches!", key))
-					}
+					logger.Logger.Debug(fmt.Sprintf("Key '%s' matches!", key))
 				}
 				break // Success, move to next path
 			}else{
-				logger.Logger.Error(fmt.Sprintf("Error reading path %s: %s", path, err.Error()))
+				logger.Logger.Debug(fmt.Sprintf("Error reading path %s: %s", path, err.Error()))
 				logger.Logger.Info("Retrying to verify restore...")
 				if retry < maxRetries-1 {
-					// Backoff before retry
 					time.Sleep(retryDelay)
 				}
 			}
