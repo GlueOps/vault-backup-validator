@@ -17,6 +17,33 @@ func isDebugMode() bool {
 	return os.Getenv("LOG_LEVEL") == "debug"
 }
 
+// compareValues compares two values, normalizing JSON strings for semantic comparison
+func compareValues(expected, actual interface{}) bool {
+	expectedJSON, _ := json.Marshal(expected)
+	actualJSON, _ := json.Marshal(actual)
+	
+	// Direct match
+	if string(expectedJSON) == string(actualJSON) {
+		return true
+	}
+	
+	// If both are strings, try parsing as JSON and compare normalized
+	expectedStr, expectedIsStr := expected.(string)
+	actualStr, actualIsStr := actual.(string)
+	if expectedIsStr && actualIsStr {
+		var expectedObj, actualObj interface{}
+		if json.Unmarshal([]byte(expectedStr), &expectedObj) == nil &&
+		   json.Unmarshal([]byte(actualStr), &actualObj) == nil {
+			// Both are valid JSON strings, compare parsed/normalized
+			e, _ := json.Marshal(expectedObj)
+			a, _ := json.Marshal(actualObj)
+			return string(e) == string(a)
+		}
+	}
+	
+	return false
+}
+
 type RestoreParams struct {
 	SourceBackupURL             string                `json:"source_backup_url"`
 	SourceKeysURL               string                `json:"source_keys_url"`
@@ -94,16 +121,18 @@ func VerifyRestore(v *govault.Client, secrets *VaultSecrets, restoreParams Resto
 				}
 				
 				for key, value := range values.(map[string]interface{}) {
-					expectedJSON, _ := json.Marshal(value)
-					actualJSON, _ := json.Marshal(data[key])
 					if isDebugMode() {
+						expectedJSON, _ := json.Marshal(value)
+						actualJSON, _ := json.Marshal(data[key])
 						logger.Logger.Debug(fmt.Sprintf("Comparing key '%s':", key))
 						logger.Logger.Debug(fmt.Sprintf("  Expected (type %T): %s", value, string(expectedJSON)))
 						logger.Logger.Debug(fmt.Sprintf("  Actual   (type %T): %s", data[key], string(actualJSON)))
 					}
-					if string(expectedJSON) != string(actualJSON) {
+					if !compareValues(value, data[key]) {
 						logger.Logger.Error(fmt.Sprintf("Mismatch for key '%s'", key))
 						if isDebugMode() {
+							expectedJSON, _ := json.Marshal(value)
+							actualJSON, _ := json.Marshal(data[key])
 							logger.Logger.Debug(fmt.Sprintf("Mismatch details - expected: %s, got: %s", string(expectedJSON), string(actualJSON)))
 						}
 						return false, nil
