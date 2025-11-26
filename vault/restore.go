@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 	govault "github.com/hashicorp/vault/api"
@@ -15,6 +16,12 @@ import (
 
 func isDebugMode() bool {
 	return os.Getenv("LOG_LEVEL") == "debug"
+}
+
+// normalizeWhitespace collapses all whitespace sequences to a single space
+func normalizeWhitespace(s string) string {
+	re := regexp.MustCompile(`\s+`)
+	return strings.TrimSpace(re.ReplaceAllString(s, " "))
 }
 
 // compareValues compares two values, normalizing JSON strings for semantic comparison
@@ -39,6 +46,9 @@ func compareValues(expected, actual interface{}) bool {
 			a, _ := json.Marshal(actualObj)
 			return string(e) == string(a)
 		}
+		
+		// Not valid JSON - compare with normalized whitespace
+		return normalizeWhitespace(expectedStr) == normalizeWhitespace(actualStr)
 	}
 	
 	return false
