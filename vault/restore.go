@@ -3,11 +3,12 @@ package vault
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
-	"time"
 	"strings"
+	"time"
 	govault "github.com/hashicorp/vault/api"
 	"github.com/glueops/vault-backup-validator/logger"
 )
@@ -74,7 +75,9 @@ func VerifyRestore(v *govault.Client, secrets *VaultSecrets, restoreParams Resto
 				data := content.Data
 				data = data["data"].(map[string]interface{})
 				for key, value := range values.(map[string]interface{}) {
-					if !reflect.DeepEqual(value, data[key]) {
+					expectedJSON, _ := json.Marshal(value)
+					actualJSON, _ := json.Marshal(data[key])
+					if string(expectedJSON) != string(actualJSON) {
 						return false, nil
 					}
 				}
