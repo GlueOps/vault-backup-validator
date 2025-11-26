@@ -1,37 +1,36 @@
 # Stage 1: Build the Go application
-FROM golang:1.25.4@sha256:698183780de28062f4ef46f82a79ec0ae69d2d22f7b160cf69f71ea8d98bf25d
+FROM golang:1.25.4@sha256:698183780de28062f4ef46f82a79ec0ae69d2d22f7b160cf69f71ea8d98bf25d AS builder
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy go.mod and go.sum files to the working directory
 COPY go.mod go.sum ./
-
-# Download and install dependencies
 RUN go mod download
 
-# Copy the rest of the application code to the working directory
 COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o vault-backup-validator .
 
-# Build the Go application
-RUN go build -o vault-backup-validator . && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends unzip jq && \
-    rm -rf /var/lib/apt/lists/*
-    
+# Stage 2: Runtime image
+FROM debian:bookworm-slim
 
 # renovate: datasource=github-tags depName=openbao/openbao
 ARG VERSION_OPENBAO=2.4.3
 ENV CACHED_OPENBAO_VERSION=${VERSION_OPENBAO}
-  
-#Download and install Bao
-ADD https://github.com/openbao/openbao/releases/download/v${VERSION_OPENBAO}/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz /tmp/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates jq wget && \
+    rm -rf /var/lib/apt/lists/*
 
-# Unzip the Bao binary and clean up
-RUN tar -xzvf /tmp/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz bao && mv bao /usr/bin/bao && rm /tmp/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz
+# Download and install Bao
+ADD https://github.com/openbao/openbao/releases/download/v${VERSION_OPENBAO}/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz /tmp/bao.tar.gz
+RUN tar -xzf /tmp/bao.tar.gz bao && mv bao /usr/bin/bao && rm /tmp/bao.tar.gz
+
+WORKDIR /app
+
+# Copy binary and required files from builder
+COPY --from=builder /app/vault-backup-validator .
+COPY --from=builder /app/vault/configs ./vault/configs
+COPY --from=builder /app/vault/scripts ./vault/scripts
 
 EXPOSE 8080
 
-# Start the application as root
 CMD ["/app/vault-backup-validator"]
