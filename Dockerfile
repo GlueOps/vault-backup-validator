@@ -17,7 +17,7 @@ ARG VERSION_OPENBAO=2.4.3
 ENV CACHED_OPENBAO_VERSION=${VERSION_OPENBAO}
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ca-certificates jq wget && \
+    apt-get install -y --no-install-recommends ca-certificates jq wget procps && \
     rm -rf /var/lib/apt/lists/*
 
 # Download and install Bao
