@@ -14,9 +14,6 @@ import (
 	"github.com/glueops/vault-backup-validator/logger"
 )
 
-func isDebugMode() bool {
-	return os.Getenv("LOG_LEVEL") == "debug"
-}
 
 // normalizeWhitespace collapses all whitespace sequences to a single space
 func normalizeWhitespace(s string) string {
