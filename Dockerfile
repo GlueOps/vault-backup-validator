@@ -13,7 +13,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o vault-backup-validator
 FROM debian:bookworm-slim
 
 # renovate: datasource=github-tags depName=openbao/openbao
-ARG VERSION_OPENBAO=2.4.3
+ARG VERSION_OPENBAO=2.4.4
 ENV CACHED_OPENBAO_VERSION=${VERSION_OPENBAO}
 
 RUN apt-get update && \
