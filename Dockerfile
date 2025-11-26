@@ -21,7 +21,7 @@ RUN go build -o vault-backup-validator . && \
     
 
 # renovate: datasource=github-tags depName=openbao/openbao
-ARG VERSION_OPENBAO=2.4.3
+ARG VERSION_OPENBAO=2.4.4
 ENV CACHED_OPENBAO_VERSION=${VERSION_OPENBAO}
   
 #Download and install Bao
