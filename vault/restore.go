@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"reflect"
 	"time"
 	"strings"
 	govault "github.com/hashicorp/vault/api"
@@ -73,7 +74,7 @@ func VerifyRestore(v *govault.Client, secrets *VaultSecrets, restoreParams Resto
 				data := content.Data
 				data = data["data"].(map[string]interface{})
 				for key, value := range values.(map[string]interface{}) {
-					if (value.(string) != data[key]){
+					if !reflect.DeepEqual(value, data[key]) {
 						return false, nil
 					}
 				}
