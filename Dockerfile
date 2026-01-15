@@ -1,5 +1,5 @@
 # Stage 1: Build the Go application
-FROM golang:1.25.5@sha256:68ee6dfa91a074c6e62a8af3ff0a427a36a78015778247af4f18398f37a5e91b AS builder
+FROM golang:1.25.6@sha256:eb37f58646a901dc7727cf448cae36daaefaba79de33b5058dab79aa4c04aefb AS builder
 
 WORKDIR /app
 
