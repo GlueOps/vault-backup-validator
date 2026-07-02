@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.18.1](https://github.com/GlueOps/vault-backup-validator/compare/v2.18.0...v2.18.1) (2026-07-02)
+
+
+### Miscellaneous Chores
+
+* **fallback:** update docker/setup-qemu-action ([#226](https://github.com/GlueOps/vault-backup-validator/issues/226)) ([e1f3688](https://github.com/GlueOps/vault-backup-validator/commit/e1f3688099eedba241b97f15aa040976293c8d49))
+* **patch:** update go to 1.26.4 #patch ([#227](https://github.com/GlueOps/vault-backup-validator/issues/227)) ([cdd7487](https://github.com/GlueOps/vault-backup-validator/commit/cdd748708225bf2ab409d9b41b18d5d6ee730601))
+
 ## [2.18.0](https://github.com/GlueOps/vault-backup-validator/compare/v2.17.1...v2.18.0) (2026-06-30)
 
 
