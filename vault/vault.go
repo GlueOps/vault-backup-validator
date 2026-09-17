@@ -42,7 +42,7 @@ func InstallVault(vault_version string) ([]byte, error){
     cmd := exec.Command("bash", scriptPath, vault_version)
     out, err := cmd.CombinedOutput()
     if err != nil {
-		logger.Logger.Error(err.Error())
+		logger.Logger.Error(err.Error() + ": " + string(out))
         return out, fmt.Errorf("error installing vault")
     }
 	logger.Logger.Info("Vault installation done")
