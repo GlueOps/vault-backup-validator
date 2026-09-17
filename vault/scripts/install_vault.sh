@@ -9,24 +9,34 @@ set -euo pipefail
 requested="${1:?OpenBao version required}"
 requested="${requested#v}"
 
+# Release assets are fetched through the GlueOps Nexus raw proxy for GitHub
+# (same one GlueKube uses), with github.com as a fallback if the proxy is
+# unreachable or does not have the asset.
+#
 # OpenBao renamed its release tarballs starting with v2.6.0:
 #   <= 2.5.x : bao_<ver>_Linux_x86_64.tar.gz
 #   >= 2.6.0 : openbao_<ver>_linux_amd64.tar.gz
 # Backups can come from either era, so try the current name first and fall
 # back to the legacy one.
+GITHUB_PROXY_BASE="https://repo.gpkg.io/repository/raw-github"
+GITHUB_BASE="https://github.com"
+
 download_bao() {
     local version="$1"
     local dest="$2"
-    local base="https://github.com/openbao/openbao/releases/download/v${version}"
-    local name
-    for name in "openbao_${version}_linux_amd64.tar.gz" "bao_${version}_Linux_x86_64.tar.gz"; do
-        echo "Trying ${base}/${name}"
-        if wget -q -O "${dest}" "${base}/${name}"; then
-            return 0
-        fi
-        rm -f "${dest}"
+    local path="openbao/openbao/releases/download/v${version}"
+    local name base
+    # Exhaust the proxy (both names) before touching github.com.
+    for base in "${GITHUB_PROXY_BASE}" "${GITHUB_BASE}"; do
+        for name in "openbao_${version}_linux_amd64.tar.gz" "bao_${version}_Linux_x86_64.tar.gz"; do
+            echo "Trying ${base}/${path}/${name}"
+            if wget -q --timeout=30 --tries=2 -O "${dest}" "${base}/${path}/${name}"; then
+                return 0
+            fi
+            rm -f "${dest}"
+        done
     done
-    echo "ERROR: could not download OpenBao ${version} under either release asset name" >&2
+    echo "ERROR: could not download OpenBao ${version} under either release asset name from the proxy or github.com" >&2
     return 1
 }
 

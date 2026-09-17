@@ -19,8 +19,9 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates jq wget procps && \
     rm -rf /var/lib/apt/lists/*
 
-# Download and install Bao
-ADD https://github.com/openbao/openbao/releases/download/v${VERSION_OPENBAO}/openbao_${VERSION_OPENBAO}_linux_amd64.tar.gz /tmp/bao.tar.gz
+# Download and install Bao via the GlueOps Nexus raw proxy for GitHub (same one
+# GlueKube uses). install_vault.sh uses the same proxy at runtime.
+ADD https://repo.gpkg.io/repository/raw-github/openbao/openbao/releases/download/v${VERSION_OPENBAO}/openbao_${VERSION_OPENBAO}_linux_amd64.tar.gz /tmp/bao.tar.gz
 RUN tar -xzf /tmp/bao.tar.gz bao && mv bao /usr/bin/bao && rm /tmp/bao.tar.gz
 
 WORKDIR /app
