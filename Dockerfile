@@ -13,15 +13,15 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o vault-backup-validator
 FROM debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171
 
 # renovate: datasource=github-tags depName=openbao/openbao
-ARG VERSION_OPENBAO=2.5.4
-ENV CACHED_OPENBAO_VERSION=${VERSION_OPENBAO}
+ARG VERSION_OPENBAO=2.6.2
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates jq wget procps && \
     rm -rf /var/lib/apt/lists/*
 
-# Download and install Bao
-ADD https://github.com/openbao/openbao/releases/download/v${VERSION_OPENBAO}/bao_${VERSION_OPENBAO}_Linux_x86_64.tar.gz /tmp/bao.tar.gz
+# Download and install Bao via the GlueOps Nexus raw proxy for GitHub (same one
+# GlueKube uses). install_vault.sh uses the same proxy at runtime.
+ADD https://repo.gpkg.io/repository/raw-github/openbao/openbao/releases/download/v${VERSION_OPENBAO}/openbao_${VERSION_OPENBAO}_linux_amd64.tar.gz /tmp/bao.tar.gz
 RUN tar -xzf /tmp/bao.tar.gz bao && mv bao /usr/bin/bao && rm /tmp/bao.tar.gz
 
 WORKDIR /app
