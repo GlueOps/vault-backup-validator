@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.20.0](https://github.com/GlueOps/vault-backup-validator/compare/v2.19.0...v2.20.0) (2026-10-01)
+
+
+### Features
+
+* update docker/setup-buildx-action to v4.3.0 #minor ([#259](https://github.com/GlueOps/vault-backup-validator/issues/259)) ([2d6253f](https://github.com/GlueOps/vault-backup-validator/commit/2d6253ff63b4514d5bdd4edd744173878d52cca0))
+* update go to 1.27.0 #minor ([#257](https://github.com/GlueOps/vault-backup-validator/issues/257)) ([f50482d](https://github.com/GlueOps/vault-backup-validator/commit/f50482df6b6f1e661b9856972ba0f87c0362df06))
+
+
+### Miscellaneous Chores
+
+* **patch:** update go to 1.26.7 #patch ([#256](https://github.com/GlueOps/vault-backup-validator/issues/256)) ([edf45f9](https://github.com/GlueOps/vault-backup-validator/commit/edf45f9ae7833f359a01a573147fb9b1dc259172))
+* **patch:** update go to 1.27.1 #patch ([#260](https://github.com/GlueOps/vault-backup-validator/issues/260)) ([0fb049d](https://github.com/GlueOps/vault-backup-validator/commit/0fb049dee11e242b0120513e0345dab5c5c8a977))
+
 ## [2.19.0](https://github.com/GlueOps/vault-backup-validator/compare/v2.18.0...v2.19.0) (2026-09-17)
 
 
