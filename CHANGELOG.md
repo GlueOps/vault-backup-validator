@@ -1,5 +1,34 @@
 # Changelog
 
+## [2.20.0](https://github.com/GlueOps/vault-backup-validator/compare/v2.19.0...v2.20.0) (2026-10-28)
+
+
+### Features
+
+* update docker/build-push-action to v7.4.0 #minor ([#261](https://github.com/GlueOps/vault-backup-validator/issues/261)) ([0a466ba](https://github.com/GlueOps/vault-backup-validator/commit/0a466ba995c08a7bb0ff341b7f90c1784203c86c))
+* update docker/setup-buildx-action to v4.3.0 #minor ([#259](https://github.com/GlueOps/vault-backup-validator/issues/259)) ([2d6253f](https://github.com/GlueOps/vault-backup-validator/commit/2d6253ff63b4514d5bdd4edd744173878d52cca0))
+* update docker/setup-buildx-action to v4.4.0 #minor ([#263](https://github.com/GlueOps/vault-backup-validator/issues/263)) ([3311066](https://github.com/GlueOps/vault-backup-validator/commit/33110664e5fd86bc24dd3e07244685075d669633))
+* update go to 1.27.0 #minor ([#257](https://github.com/GlueOps/vault-backup-validator/issues/257)) ([f50482d](https://github.com/GlueOps/vault-backup-validator/commit/f50482df6b6f1e661b9856972ba0f87c0362df06))
+* update golang to 1.27.3 #minor ([#267](https://github.com/GlueOps/vault-backup-validator/issues/267)) ([a24bef8](https://github.com/GlueOps/vault-backup-validator/commit/a24bef80ce376d501e4621ff888c0a9d2e340143))
+
+
+### Miscellaneous Chores
+
+* **fallback:** update debian ([#265](https://github.com/GlueOps/vault-backup-validator/issues/265)) ([873867c](https://github.com/GlueOps/vault-backup-validator/commit/873867c7ca70bae43c840ec8fa359d6822519f1f))
+* **fallback:** update debian ([#273](https://github.com/GlueOps/vault-backup-validator/issues/273)) ([95dd169](https://github.com/GlueOps/vault-backup-validator/commit/95dd1696252e773c59cc6b7c7928b8ac1ce4a72b))
+* **fallback:** update docker/setup-qemu-action ([#262](https://github.com/GlueOps/vault-backup-validator/issues/262)) ([143caa0](https://github.com/GlueOps/vault-backup-validator/commit/143caa06d7942926b2734f4437de3d2ac2f6479b))
+* **fallback:** update golang ([#270](https://github.com/GlueOps/vault-backup-validator/issues/270)) ([c79a697](https://github.com/GlueOps/vault-backup-validator/commit/c79a697e97d40b36d12b2458e9fa49e91ccaba16))
+* **fallback:** update golang ([#271](https://github.com/GlueOps/vault-backup-validator/issues/271)) ([05f17db](https://github.com/GlueOps/vault-backup-validator/commit/05f17db671bbc53ed3cb2d214b829df75da2dba3))
+* **fallback:** update golang ([#272](https://github.com/GlueOps/vault-backup-validator/issues/272)) ([87ec8de](https://github.com/GlueOps/vault-backup-validator/commit/87ec8de2f8f90bac3f8fa653be98d0de7c1365b8))
+* **fallback:** update golang ([#274](https://github.com/GlueOps/vault-backup-validator/issues/274)) ([a634888](https://github.com/GlueOps/vault-backup-validator/commit/a63488850f0a174cf3db6ca641f906189307bbf4))
+* **fallback:** update golang ([#275](https://github.com/GlueOps/vault-backup-validator/issues/275)) ([2b6c6de](https://github.com/GlueOps/vault-backup-validator/commit/2b6c6de5fa3954c026740f03428604ceb35796d4))
+* **fallback:** update golang ([#276](https://github.com/GlueOps/vault-backup-validator/issues/276)) ([ac6a666](https://github.com/GlueOps/vault-backup-validator/commit/ac6a6663bd08f1dfa9db718b9e273294575a2800))
+* **fallback:** update golang ([#277](https://github.com/GlueOps/vault-backup-validator/issues/277)) ([8ee124b](https://github.com/GlueOps/vault-backup-validator/commit/8ee124be70ef2b3c20e05362cbf454003a52a2f0))
+* **patch:** update docker/setup-buildx-action to v4.4.1 #patch ([#264](https://github.com/GlueOps/vault-backup-validator/issues/264)) ([cafffb7](https://github.com/GlueOps/vault-backup-validator/commit/cafffb7aa4a379a9141bbe2c7b56f4fa3e2d6b62))
+* **patch:** update go to 1.26.7 #patch ([#256](https://github.com/GlueOps/vault-backup-validator/issues/256)) ([edf45f9](https://github.com/GlueOps/vault-backup-validator/commit/edf45f9ae7833f359a01a573147fb9b1dc259172))
+* **patch:** update go to 1.27.1 #patch ([#260](https://github.com/GlueOps/vault-backup-validator/issues/260)) ([0fb049d](https://github.com/GlueOps/vault-backup-validator/commit/0fb049dee11e242b0120513e0345dab5c5c8a977))
+* **patch:** update golang to 1.26.10 #patch ([#266](https://github.com/GlueOps/vault-backup-validator/issues/266)) ([864f0b5](https://github.com/GlueOps/vault-backup-validator/commit/864f0b5e6b69ebdca40cf7d725865e4f495e6e70))
+
 ## [2.19.0](https://github.com/GlueOps/vault-backup-validator/compare/v2.18.0...v2.19.0) (2026-09-17)
 
 
